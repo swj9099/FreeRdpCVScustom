@@ -138,5 +138,7 @@ out:
 	}
 
 	LocalFree(args);
+	
+	system("pause");
 	return ret;
 }

@@ -153,6 +153,13 @@ struct rdp_file
 
 	LPSTR PreconnectionBlob; /* pcb */
 
+	//添加一些变量
+	LPSTR ClipboardContent;//存储需要复制到剪切板的内容
+	LPSTR StartFlag;//存储开始标志
+	LPSTR EndFlag;//存储结束标志
+	DWORD MaxTime;//等待的最大时间 
+	DWORD WaitingCount;//发送ALT+R按键的间隔时间 
+
 	int lineCount;
 	int lineSize;
 	rdpFileLine* lines;

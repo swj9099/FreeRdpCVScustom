@@ -2002,6 +2002,9 @@ UINT32 freerdp_get_param_uint32(rdpSettings* settings, int id)
 		case FreeRDP_TlsSecLevel:
 			return settings->TlsSecLevel;
 
+		case FreeRDP_MaxTime://对于最大等待时间的处理
+			return settings->MaxTime;
+
 		default:
 			WLog_ERR(TAG,  "freerdp_get_param_uint32: unknown id: %d", id);
 			return 0;
@@ -2347,6 +2350,10 @@ int freerdp_set_param_uint32(rdpSettings* settings, int id, UINT32 param)
 		case FreeRDP_TlsSecLevel:
 			settings->TlsSecLevel = param;
 
+		case FreeRDP_MaxTime://对于最大等待时间的处理
+			settings->MaxTime = param;
+			break;
+
 		default:
 			WLog_ERR(TAG, "freerdp_set_param_uint32: unknown id %d (param = %"PRIu32")", id, param);
 			return -1;
@@ -2545,8 +2552,14 @@ char* freerdp_get_param_string(rdpSettings* settings, int id)
 		case FreeRDP_ImeFileName:
 			return settings->ImeFileName;
 
-		case FreeRDP_DrivesToRedirect:
-			return settings->DrivesToRedirect;
+		case FreeRDP_DrivesToRedirect://得到挂载的路径值
+			return settings->DrivePosition;
+			
+		case FreeRDP_StartFlag://对于开始标志的处理
+			return settings->StartFlag;
+			
+		case FreeRDP_EndFlag://对于结束标志的处理
+			return settings->EndFlag;
 
 		default:
 			WLog_ERR(TAG, "freerdp_get_param_string: unknown id: %d", id);
@@ -2767,8 +2780,16 @@ int freerdp_set_param_string(rdpSettings* settings, int id, const char* param)
 			tmp = &settings->ImeFileName;
 			break;
 
-		case FreeRDP_DrivesToRedirect:
-			tmp = &settings->DrivesToRedirect;
+		case FreeRDP_DrivesToRedirect://将挂载的磁盘路径赋值给settings->DrivePosition，用于检测标志文件
+			tmp = &settings->DrivePosition;
+			break;
+			
+		case FreeRDP_StartFlag://对于开始标志的处理
+			tmp = &settings->StartFlag;
+			break;
+			
+		case FreeRDP_EndFlag://对于结束标志的处理
+			tmp = &settings->EndFlag;
 			break;
 
 		default:

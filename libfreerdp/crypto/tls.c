@@ -638,6 +638,8 @@ static BOOL tls_prepare(rdpTls* tls, BIO* underlying, SSL_METHOD* method,
 #endif
 {
 	rdpSettings* settings = tls->settings;
+	SSL_load_error_strings();	// 错误信息的初始化
+	SSL_library_init();			// 初始化SSL算法库函数( 加载要用到的算法 )
 	tls->ctx = SSL_CTX_new(method);
 
 	if (!tls->ctx)

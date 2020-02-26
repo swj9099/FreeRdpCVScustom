@@ -80,9 +80,9 @@ static int freerdp_client_rdp_file_set_integer(rdpFile* file, const char* name, 
 		file->EnableSuperSpan = value;
 	else if (_stricmp(name, "superpanaccelerationfactor") == 0)
 		file->SuperSpanAccelerationFactor = value;
-	else if (_stricmp(name, "desktopwidth") == 0)
+	else if (_stricmp(name, "desktopwidth") == 0)  // 图形界面宽度（像素）
 		file->DesktopWidth = value;
-	else if (_stricmp(name, "desktopheight") == 0)
+	else if (_stricmp(name, "desktopheight") == 0) // 图形界面高度（像素）
 		file->DesktopHeight = value;
 	else if (_stricmp(name, "desktop size id") == 0)
 		file->DesktopSizeId = value;
@@ -134,7 +134,7 @@ static int freerdp_client_rdp_file_set_integer(rdpFile* file, const char* name, 
 		file->BitmapCacheSize = value;
 	else if (_stricmp(name, "bitmapcachepersistenable") == 0)
 		file->BitmapCachePersistEnable = value;
-	else if (_stricmp(name, "server port") == 0)
+	else if (_stricmp(name, "port") == 0)
 		file->ServerPort = value;
 	else if (_stricmp(name, "redirectdrives") == 0)
 		file->RedirectDrives = value;
@@ -196,6 +196,10 @@ static int freerdp_client_rdp_file_set_integer(rdpFile* file, const char* name, 
 		file->UseRedirectionServerName = value;
 	else if (_stricmp(name, "rdgiskdcproxy") == 0)
 		file->RdgIsKdcProxy = value;
+	else if (_stricmp(name, "time") == 0) // 最大等待时间（超时时间）
+		file->MaxTime = value;
+	else if (_stricmp(name, "waitingcount") == 0) // 发送ALT+R组合键的间隔时间
+		file->WaitingCount = value;
 	else
 		standard = 1;
 
@@ -260,9 +264,9 @@ static int freerdp_client_rdp_file_set_string(rdpFile* file, const char* name, c
 		tmp = &file->Username;
 	else if (_stricmp(name, "domain") == 0)
 		tmp = &file->Domain;
-	else if (_stricmp(name, "password") == 0)
+	else if (_stricmp(name, "password") == 0) // 密码
 		tmp = &file->Password;
-	else if (_stricmp(name, "full address") == 0)
+	else if (_stricmp(name, "address") == 0)  // 远程连接ip地址由full address修改为address
 		tmp = &file->FullAddress;
 	else if (_stricmp(name, "alternate full address") == 0)
 		tmp = &file->AlternateFullAddress;
@@ -292,7 +296,7 @@ static int freerdp_client_rdp_file_set_string(rdpFile* file, const char* name, c
 		tmp = &file->GatewayAccessToken;
 	else if (_stricmp(name, "kdcproxyname") == 0)
 		tmp = &file->KdcProxyName;
-	else if (_stricmp(name, "drivestoredirect") == 0)
+	else if (_stricmp(name, "drivetoredirect") == 0) // 挂载共享磁盘
 		tmp = &file->DrivesToRedirect;
 	else if (_stricmp(name, "devicestoredirect") == 0)
 		tmp = &file->DevicesToRedirect;
@@ -300,6 +304,12 @@ static int freerdp_client_rdp_file_set_string(rdpFile* file, const char* name, c
 		tmp = &file->WinPosStr;
 	else if (_stricmp(name, "pcb") == 0)
 		tmp = &file->PreconnectionBlob;
+	else if (_stricmp(name, "clipboardcontent") == 0) // 剪切板内容的设置(扫描脚本执行路径)
+		tmp = &file->ClipboardContent;
+	else if (_stricmp(name, "startflag") == 0) // 开始标志
+		tmp = &file->StartFlag;
+	else if (_stricmp(name, "endflag") == 0) // 结束标志
+		tmp = &file->EndFlag;
 	else
 		standard = 1;
 
@@ -456,6 +466,9 @@ BOOL freerdp_client_parse_rdp_file_buffer(rdpFile* file, const BYTE* buffer,
 
 			if (freerdp_client_parse_rdp_file_add_line(file, line, index) == -1)
 				goto fail;
+
+			if (beg[0] == '#') // 处理注释行
+				goto next_line;
 
 			if (beg[0] == '/')
 			{
@@ -716,6 +729,16 @@ size_t freerdp_client_write_rdp_file_buffer(const rdpFile* file, char* buffer, s
 	return size;
 }
 
+// 将指定内容复制到剪切板
+int set_clipboard_text(char * text, int size)
+{
+    int status = -1;
+
+	status = 0;	
+    return status;
+}
+
+// 将file中的值赋给settings
 BOOL freerdp_client_populate_settings_from_rdp_file(rdpFile* file, rdpSettings* settings)
 {
 	if (~((size_t) file->Domain))
@@ -1051,8 +1074,33 @@ BOOL freerdp_client_populate_settings_from_rdp_file(rdpFile* file, rdpSettings* 
 		 * Very similar to DevicesToRedirect, but can contain a
 		 * comma-separated list of drive letters to redirect.
 		 */
-		const BOOL empty = !file->DrivesToRedirect || (strlen(file->DrivesToRedirect) == 0);
-		freerdp_set_param_bool(settings, FreeRDP_RedirectDrives, !empty);
+		int drivePathLength = strlen(file->DrivesToRedirect); 
+		char* drivePath = (char *)calloc(drivePathLength+12+1, sizeof(char));
+
+		if (freerdp_set_param_string(settings, FreeRDP_DrivesToRedirect, file->DrivesToRedirect) != 0) 
+		{
+			free(drivePath);
+			drivePath = NULL;
+			return FALSE;
+		}
+		
+		if (!drivePath) 
+		{
+			WLog_ERR(TAG, "malloc failed!");
+			return FALSE;
+		}
+		strcpy(drivePath, "/drive:t,");
+		strcpy(&drivePath[9], file->DrivesToRedirect);
+		drivePath[drivePathLength+9] = '\0';
+		if (!freerdp_client_add_option(file, drivePath))
+		{
+			free(drivePath);
+			drivePath = NULL;
+			return FALSE;
+		}
+		free(drivePath);
+		drivePath = NULL;
+
 	}
 
 	if (~file->KeyboardHook)
@@ -1065,6 +1113,39 @@ BOOL freerdp_client_populate_settings_from_rdp_file(rdpFile* file, rdpSettings* 
 		freerdp_set_param_string(settings, FreeRDP_PreconnectionBlob, file->PreconnectionBlob);
 		freerdp_set_param_bool(settings, FreeRDP_SendPreconnectionPdu, TRUE);
 		freerdp_set_param_bool(settings, FreeRDP_VmConnectMode, TRUE);
+	}
+
+	// 对于最大等待时间的处理
+	if (~file->MaxTime)
+	{
+		freerdp_set_param_uint32(settings, FreeRDP_MaxTime, file->MaxTime);
+	}
+	// 对于剪切板内容的设置，将其复制到剪切板中
+	if (~((size_t)file->ClipboardContent))
+	{
+		// 将需要复制的内容file->ClipboardContext添加到剪切板
+		int length = strlen(file->ClipboardContent);
+		if (set_clipboard_text(file->ClipboardContent, length) < 0)
+		{
+			printf("clipboard content剪切板内容设置失败！\n");
+			return FALSE;
+		}
+		// 共享剪切板设置
+//		if (!freerdp_client_add_option(file, "+clipboard"))
+//			return FALSE;	
+		settings->ClipboardDone = TRUE; // 剪切板相关设置完成
+	}
+	// 对于开始标志的处理，将其置入settings->StartFlag
+	if (~((size_t)file->StartFlag))
+	{
+		if (freerdp_set_param_string(settings, FreeRDP_StartFlag, file->StartFlag) != 0)
+			return FALSE;
+	}
+	// 对于结束标志的处理，将其置入settings->FreeRDP_EndFlag
+	if (~((size_t)file->EndFlag))
+	{
+		if (freerdp_set_param_string(settings, FreeRDP_EndFlag, file->EndFlag) != 0)
+			return FALSE;
 	}
 
 	if (file->argc > 1)
@@ -1337,6 +1418,12 @@ void freerdp_client_rdp_file_free(rdpFile* file)
 		freerdp_client_file_string_check_free(file->DrivesToRedirect);
 		freerdp_client_file_string_check_free(file->DevicesToRedirect);
 		freerdp_client_file_string_check_free(file->WinPosStr);
+
+		// 为新添加的变量添加释放方法
+		freerdp_client_file_string_check_free(file->ClipboardContent);
+		freerdp_client_file_string_check_free(file->StartFlag);
+		freerdp_client_file_string_check_free(file->EndFlag);
+
 		free(file);
 	}
 }

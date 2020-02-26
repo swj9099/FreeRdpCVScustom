@@ -617,6 +617,15 @@ rdpSettings* freerdp_settings_new(DWORD flags)
 	settings->ActionScript = _strdup("~/.config/freerdp/action.sh");
 	settings->SmartcardLogon = FALSE;
 	settings->TlsSecLevel = 1;
+
+	// 初始化新声明的变量
+	settings->MaxTime = 0;
+	settings->RedirectDriveAlready = FALSE;
+	settings->ClipboardDone = FALSE;
+	settings->DrivePosition = NULL;
+	settings->StartFlag = NULL;
+	settings->EndFlag = NULL;
+
 	return settings;
 out_fail:
 	free(settings->HomePath);
@@ -1121,6 +1130,12 @@ void freerdp_settings_free(rdpSettings* settings)
 	freerdp_static_channel_collection_free(settings);
 	freerdp_dynamic_channel_collection_free(settings);
 	free(settings->SettingsModified);
+
+	//对于自己添加变量的释放语句
+	free(settings->DrivePosition);
+	free(settings->StartFlag);
+	free(settings->EndFlag);
+
 	free(settings);
 }
 
