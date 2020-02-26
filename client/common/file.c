@@ -733,6 +733,54 @@ size_t freerdp_client_write_rdp_file_buffer(const rdpFile* file, char* buffer, s
 int set_clipboard_text(char * text, int size)
 {
     int status = -1;
+	HGLOBAL hMemory;
+	LPTSTR lpMemory;
+	// 待写入数据
+	char * content = text;
+	int contentSize = strlen(content) + 1;
+
+	if (!OpenClipboard(NULL))    // 打开剪切板，打开后，其他进程无法访问
+	{
+		//puts("剪切板打开失败");
+		WLog_ERR(TAG, "Freerdp clipboard open failed !!!");
+		return status;
+	}
+
+	if (!EmptyClipboard())       // 清空剪切板，写入之前，必须先清空剪切板
+	{
+		//puts("清空剪切板失败");
+		WLog_ERR(TAG, "Freerdp clipboard clear failed !!!");
+		CloseClipboard();
+		return status;
+	}
+
+	if ((hMemory = GlobalAlloc(GMEM_MOVEABLE, contentSize)) == NULL)    // 对剪切板分配内存
+	{
+		//puts("内存赋值错误!!!");
+		WLog_ERR(TAG, "Freerdp clipboard alloc Memory failed !!!");
+		CloseClipboard();
+		return status;
+	}
+
+	if ((lpMemory = (LPTSTR)GlobalLock(hMemory)) == NULL)             // 将内存区域锁定
+	{
+		//puts("锁定内存错误!!!");
+		WLog_ERR(TAG, "Freerdp clipboard Memory lock failed !!!");
+		CloseClipboard();
+		return status;
+	}
+
+	memcpy_s(lpMemory, contentSize, content, contentSize);   // 将数据复制进入内存区域
+
+	GlobalUnlock(hMemory);                   // 解除内存锁定
+
+	if (SetClipboardData(CF_TEXT, hMemory) == NULL)
+	{
+		//puts("设置剪切板数据失败!!!");
+		WLog_ERR(TAG, "Freerdp clipboard Data set failed !!!");
+		CloseClipboard();
+		return status;
+	}
 
 	status = 0;	
     return status;

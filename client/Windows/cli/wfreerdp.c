@@ -126,6 +126,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	if (freerdp_client_stop(context) != 0)
 		goto out;
 
+
 out:
 	freerdp_client_context_free(context);
 
