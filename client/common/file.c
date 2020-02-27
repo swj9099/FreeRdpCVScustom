@@ -781,7 +781,7 @@ int set_clipboard_text(char * text, int size)
 		CloseClipboard();
 		return status;
 	}
-
+	CloseClipboard();
 	status = 0;	
     return status;
 }
