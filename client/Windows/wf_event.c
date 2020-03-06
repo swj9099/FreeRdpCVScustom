@@ -64,7 +64,7 @@ LRESULT CALLBACK wf_ll_kbd_proc(int nCode, WPARAM wParam, LPARAM lParam)
 	rdpInput* input;
 	PKBDLLHOOKSTRUCT p;
 	DEBUG_KBD("Low-level keyboard hook, hWnd %X nCode %X wParam %X", g_focus_hWnd,
-	          nCode, wParam);
+		nCode, wParam);
 
 	if (g_flipping_in)
 	{

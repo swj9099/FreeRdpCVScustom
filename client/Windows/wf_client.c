@@ -55,7 +55,7 @@
 #include "wf_client.h"
 
 #include "resource.h"
-
+#include "wf_selfkeyboard.h"
 #define TAG CLIENT_TAG("windows")
 
 static int wf_create_console(void)
@@ -653,7 +653,7 @@ static DWORD WINAPI wf_client_thread(LPVOID lpParam)
 			break;
 
 		quit_msg = FALSE;
-
+		
 		while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 		{
 			msg_ret = GetMessage(&msg, NULL, 0, 0);
@@ -686,7 +686,7 @@ static DWORD WINAPI wf_client_thread(LPVOID lpParam)
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
+		
 		if (quit_msg)
 			break;
 	}
@@ -727,6 +727,7 @@ static DWORD WINAPI wf_keyboard_thread(LPVOID lpParam)
 
 	if (hook_handle)
 	{
+
 		while ((status = GetMessage(&msg, NULL, 0, 0)) != 0)
 		{
 			if (status == -1)

@@ -39,7 +39,7 @@
 #include "resource.h"
 
 #include "wf_client.h"
-
+#include "wf_selfkeyboard.h"
 #include <shellapi.h>
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
@@ -112,7 +112,11 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	if (freerdp_client_start(context) != 0)
 		goto out;
 
-	thread = freerdp_client_get_thread(context);
+
+	thread = freerdp_client_get_thread(wfc);
+
+	Keyboard_init(wfc);
+	excuce();
 
 	if (thread)
 	{
@@ -122,7 +126,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 			ret = dwExitCode;
 		}
 	}
-
+	
 	if (freerdp_client_stop(context) != 0)
 		goto out;
 
