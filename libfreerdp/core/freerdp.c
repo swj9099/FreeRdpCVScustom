@@ -909,6 +909,10 @@ void freerdp_set_last_error(rdpContext* context, UINT32 lastError)
 			connectErrorCode = CONNECTERROR;
 			break;
 	}
+
+	//打印错误字符串，显示详细的错误信息
+	if(lastError != FREERDP_ERROR_SUCCESS)
+		WLog_ERR(TAG, "[VM_Finished] %s", freerdp_get_last_error_string(lastError));
 }
 
 const char* freerdp_get_logon_error_info_type(UINT32 type)

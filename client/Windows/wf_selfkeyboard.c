@@ -376,7 +376,11 @@ DWORD WINAPI excuce(rdpContext* context)
 		
 		if(nowtime - begintime > settings->MaxTime)
 		{
-			WLog_ERR(TAG, "[VM_Finished] 远程桌面扫描超时[脚本未执行完毕]，请检查超时时间后重新运行扫描脚本！");
+			if (checkstart)
+				WLog_ERR(TAG, "[VM_Finished] 远程桌面扫描超时[脚本未执行完毕]，请检查超时时间后重新运行扫描脚本！");
+			else
+				WLog_ERR(TAG, "[VM_Finished] 远程桌面扫描超时[脚本未执行]，请检查后重新运行扫描脚本：（1）共享磁盘路径错误 （2）远程主机rdpclip.exe进程被杀死（3）“Alt+R”键无效");
+			
 			ret = FALSE;
 			goto out;
 		}

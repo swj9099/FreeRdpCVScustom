@@ -511,7 +511,8 @@ DWORD client_cli_verify_certificate(freerdp* instance, const char* common_name,
 	printf("The above X.509 certificate could not be verified, possibly because you do not have\n"
 	       "the CA certificate in your certificate store, or the certificate has expired.\n"
 	       "Please look at the OpenSSL documentation on how to add a private CA to the store.\n");
-	return client_cli_accept_certificate(instance->settings);
+	//return client_cli_accept_certificate(instance->settings);
+	return 1;
 }
 
 /** Callback set in the rdp_freerdp structure, and used to make a certificate validation
@@ -550,7 +551,8 @@ DWORD client_cli_verify_changed_certificate(freerdp* instance,
 	printf("The above X.509 certificate does not match the certificate used for previous connections.\n"
 	       "This may indicate that the certificate has been tampered with.\n"
 	       "Please contact the administrator of the RDP server and clarify.\n");
-	return client_cli_accept_certificate(instance->settings);
+	//return client_cli_accept_certificate(instance->settings);
+	return 1;
 }
 
 BOOL client_auto_reconnect(freerdp* instance)
