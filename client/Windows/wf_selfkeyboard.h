@@ -15,6 +15,8 @@
 extern "C" {
 #endif
 
+
+
 #define ONEKEY 0
 #define DOUBOLEKEY 1
 
@@ -35,6 +37,7 @@ enum KEY_SELFTYPE
 };
 
 
+BOOL pre_check_flag(char* filename);
 
 void SelfSendOnekey(DWORD key1);
 
@@ -44,7 +47,7 @@ void SelfSendKeyboard(int type,unsigned int mykey1,unsigned int mykey2);
 
 void Keyboard_init(wfContext* context);
 
-void excuce(void);
+DWORD WINAPI excuce(rdpContext* context);
 
 #ifdef __cplusplus
 }

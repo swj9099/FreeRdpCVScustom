@@ -1285,8 +1285,16 @@ static UINT rdpdr_send_device_list_announce_request(rdpdrPlugin* rdpdr,
 				Stream_Write(s, Stream_Buffer(device->data), data_len);
 
 			count++;
-			WLog_INFO(TAG, "registered device #%"PRIu32": %s (type=%"PRIu32" id=%"PRIu32")",
-			          count, device->name, device->type, device->id);
+			// ¹ÒÔØ¹²Ïí´ÅÅÌhome³É¹¦Ê±£¬ÉèÖÃsettings->RedirectDriveAlready = TRUE
+			if (strcmp(device->name, "t") == 0)
+			{				
+				rdpdr->rdpcontext->settings->RedirectDriveAlready = TRUE;
+				WLog_INFO(TAG, "¹²Ïí´ÅÅÌ¹ÒÔØÍê³É£¡");
+			}
+			else
+				WLog_INFO(TAG, "registered device #%"PRIu32": %s (type=%"PRIu32" id=%"PRIu32")",
+				count, device->name, device->type, device->id);
+
 		}
 	}
 

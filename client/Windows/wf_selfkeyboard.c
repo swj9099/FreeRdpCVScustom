@@ -18,10 +18,95 @@
 #include <assert.h>
 #include <sys/types.h>
 #include <wf_selfkeyboard.h>
+#include <io.h>
+#include <time.h>
+
 #include "wf_event.h"
 #define TAG CLIENT_TAG("windows")
 
 rdpInput* g_myinput = NULL;
+BOOL EXCUCESTARTFLAGE=FALSE;
+
+BOOL pre_check_flag(char* filename)
+{
+	CONST CHAR* mfilename = filename;
+	errno_t err = 0;
+	if(!mfilename)
+	{
+		WLog_ERR(TAG,"mfilename is NULL");
+		return FALSE;
+	}
+		
+	
+	if ((err = _access_s(mfilename, 0)) == 0)
+	{
+		WLog_INFO(TAG, "[%s] 标志文件已成功检测",mfilename);
+		return TRUE;
+	}
+	else
+	{
+		//WLog_ERR(TAG, "errno is %d",err);
+		return FALSE;
+	}
+
+}
+
+// 检测flagPoint（setting->StartFlag或setting->EndFlag）是否为空；
+// 检测是否包含路径，若不包含，将其与setting->DrivePosition拼接
+char* get_flag(rdpSettings* settings, int index)
+{
+	char* flagPoint = NULL;
+	char* subFlag = NULL;
+	char* srcFlagPoint = NULL;
+
+	if (0 == index)
+		srcFlagPoint = settings->StartFlag;
+	else if (1 == index)
+		srcFlagPoint = settings->EndFlag;
+
+	if (NULL == srcFlagPoint)
+		return NULL;
+	if (settings->DrivePosition)
+		subFlag = strstr(srcFlagPoint, settings->DrivePosition);
+	else
+	{
+		WLog_ERR(TAG, "Can not find settings->DrivePosition. ");
+		return NULL;
+	}
+
+	if (NULL == subFlag) //flagPoint中不包含DrivePosition
+	{
+		if (NULL == settings->DrivePosition)
+		{
+			WLog_ERR(TAG, "Can not find the path of startflag and endflag. ");
+			return NULL;
+		}
+		else
+		{
+			int newsize = strlen(srcFlagPoint) + strlen(settings->DrivePosition) + 2;
+			flagPoint = (char *)calloc(newsize, sizeof(char));
+			strncpy(flagPoint, settings->DrivePosition, strlen(settings->DrivePosition));
+			strncat(flagPoint, "\\", 1);
+			strncat(flagPoint, srcFlagPoint, strlen(srcFlagPoint));
+			flagPoint[newsize - 1] = '\0';
+		}
+	}
+	return flagPoint;
+}
+// 检测setting->StartFlag是否为空；是否包含路径，若不包含，将其与setting->DrivePosition拼接
+BOOL get_startflag(rdpSettings* settings, char** startflag)
+{
+	if (NULL == (*startflag = get_flag(settings, 0)))
+		return FALSE;
+	return TRUE;
+}
+// 检测setting->EndFlagt是否为空；是否包含路径，若不包含，将其与setting->DrivePosition拼接
+BOOL get_endflag(rdpSettings* settings, char** endflag)
+{
+	if (NULL == (*endflag = get_flag(settings, 1)))
+		return FALSE;	
+	return TRUE;
+}
 
 void SelfSendOnekey(DWORD key1)
 {
@@ -160,12 +245,172 @@ void Keyboard_init(wfContext* context)
 	return;
 }
 
-void excuce()
+DWORD WINAPI excuce(rdpContext* context)
 {
-	Sleep(10000);
-	SelfSendKeyboard(ONEKEY,KEY_WIN,0);
-	Sleep(5000);
+	rdpSettings* settings;
+	CHAR* startflag = NULL;
+	CHAR* endflag = NULL;
+	wfContext* wfc = NULL;
+	BOOL ret = TRUE;
+	BOOL checkstart = FALSE;
+	UINT32 cont = 0;
+	UINT32 waittime = 0;
+	time_t begintime = 0;
+	time_t endtime = 0;
+	time_t nowtime = 0;
+	
+	if (context)
+	{
+		wfc = (wfContext*) context;
+		settings = context->settings;
+	} 
+	else
+	{
+		WLog_ERR(TAG,"param context is NULL !!!");
+		return FALSE;
+	}
+	while(!EXCUCESTARTFLAGE)
+		Sleep(2000);
+
+	if (!get_startflag(settings, &startflag))
+	{
+		ret = FALSE;
+		goto out;
+	}
+		
+
+
+	if (!get_endflag(settings, &endflag))
+	{
+		ret = FALSE;
+		goto out;
+	}
+
+	//剪切板判断,等待3次失败认为失败
+	cont = 0;
+	while (!settings->ClipboardDone)
+	{
+		WLog_INFO(TAG, "剪切板设置失败！");
+		if(cont++ <=3)
+		{
+			Sleep(1000);
+			continue;
+		}
+		else
+		{
+			ret = FALSE;
+			goto out;
+		};
+			
+	}
+
+	//磁盘映射判断,等待3次失败认为失败
+	cont = 0;
+	while (!settings->RedirectDriveAlready)
+	{
+		WLog_INFO(TAG, "磁盘映射设置失败！");
+		if(cont++ <=3)
+		{
+			Sleep(2000);
+			continue;
+		}
+		else
+		{
+			ret = FALSE;
+			goto out;
+		}
+
+	}
+	
+	if(pre_check_flag(startflag) || pre_check_flag(endflag))
+	{
+		WLog_ERR(TAG,"[VM_Finished] 标志文件创建时间异常，请清除已有的标志文件，重新运行扫描脚本！ !!!");
+		ret = FALSE;
+		goto out;
+	}
+
+
+	SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
+	WLog_INFO(TAG, "wait for windows state up !!!");
+	Sleep(8000); 
+	SelfSendKeyboard(DOUBOLEKEY,KEY_WIN,KEY_D);
+	WLog_INFO(TAG, "send Win + D !!!");
+	Sleep(3000);
 	SelfSendKeyboard(ONEKEY,KEY_ESC,0);
+	WLog_INFO(TAG, "send Esc !!!");
+	Sleep(3000); 
+	SelfSendKeyboard(ONEKEY,KEY_ESC,0);
+	WLog_INFO(TAG, "send Esc !!!");
+	Sleep(3000); 
+	SelfSendKeyboard(DOUBOLEKEY,KEY_WIN,KEY_R);
+	WLog_INFO(TAG, "send Win + R !!!");
+	Sleep(3000);
+	SelfSendKeyboard(DOUBOLEKEY,KEY_CTRL,KEY_A);
+	WLog_INFO(TAG, "send CTRL + A !!!");
+	Sleep(3000);
+	SelfSendKeyboard(ONEKEY,KEY_BACK,0);
+	WLog_INFO(TAG, "send Backspace !!!");
+	Sleep(3000); 
+	SelfSendKeyboard(DOUBOLEKEY,KEY_CTRL,KEY_V);
+	WLog_INFO(TAG, "send CTRL + V !!!");
+	Sleep(3000);
+	SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
+	WLog_INFO(TAG, "send ENTER!!!");
+	Sleep((settings->BeforeAltR)*100);
+	SelfSendKeyboard(DOUBOLEKEY,KEY_ALT,KEY_R);
+	WLog_INFO(TAG, "send ALT + R  !!!");
+	settings->WaitingCount;
+	time(&begintime);
+
+	cont = 0;
+	while(!pre_check_flag(endflag))
+	{
+		if((!checkstart) && pre_check_flag(startflag))
+		{
+			checkstart = TRUE;
+			time(&begintime);
+		}
+			
+		
+		time(&nowtime);
+		
+		if(nowtime - begintime > settings->MaxTime)
+		{
+			WLog_ERR(TAG, "[VM_Finished] 远程桌面扫描超时[脚本未执行完毕]，请检查超时时间后重新运行扫描脚本！");
+			ret = FALSE;
+			goto out;
+		}
+
+		if(!checkstart && (cont++ < 3))
+		{
+			SelfSendKeyboard(DOUBOLEKEY,KEY_ALT,KEY_R);
+			WLog_INFO(TAG, "send ALT + R  !!!");
+			Sleep((settings->WaitingCount) * 100);
+		}
+		else
+		{
+			Sleep(2000);
+		}
+	}
+	time(&endtime);
+	WLog_INFO(TAG, "[VM_Finished] 扫描已完成！脚本运行时间为：%d s.", (int)(endtime - begintime));
+	
+	
+	
+out:
+	if (!startflag)
+	{
+		free(startflag);
+	}
+
+	if (!endflag)
+	{
+		free(endflag);
+	}
+
+	PostMessage(wfc->hwnd,WM_CLOSE,0,0);
+	
+	return ret;
 
 }
 

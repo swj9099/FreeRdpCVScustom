@@ -58,6 +58,7 @@
 #include "wf_selfkeyboard.h"
 #define TAG CLIENT_TAG("windows")
 
+extern BOOL EXCUCESTARTFLAGE;
 static int wf_create_console(void)
 {
 	if (!AllocConsole())
@@ -657,7 +658,7 @@ static DWORD WINAPI wf_client_thread(LPVOID lpParam)
 		while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 		{
 			msg_ret = GetMessage(&msg, NULL, 0, 0);
-
+			EXCUCESTARTFLAGE = TRUE;
 			if (instance->settings->EmbeddedWindow)
 			{
 				if ((msg.message == WM_SETFOCUS) && (msg.lParam == 1))
@@ -679,6 +680,7 @@ static DWORD WINAPI wf_client_thread(LPVOID lpParam)
 
 			if ((msg_ret == 0) || (msg_ret == -1))
 			{
+				WLog_ERR(TAG,"msg.message is %0x",msg.message);
 				quit_msg = TRUE;
 				break;
 			}

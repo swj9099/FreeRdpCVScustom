@@ -868,6 +868,8 @@ typedef struct _RDPDR_PARALLEL RDPDR_PARALLEL;
 #define FreeRDP_StartFlag										   (5319)
 #define FreeRDP_EndFlag											   (5320)
 #define FreeRDP_MaxTime											   (5321)
+#define FreeRDP_WaitingCount                                       (5322)
+#define FreeRDP_BeforeAltR                                         (5323)
 
 /**
  * FreeRDP Settings Data Structure
@@ -1529,6 +1531,7 @@ struct rdp_settings
 	ALIGN64 char* EndFlag; // 结束标志
 	ALIGN64 UINT32 MaxTime; // 超时时间（最大等待时间）
 	ALIGN64 UINT32 WaitingCount; // 发送ALT+R按键的间隔时间
+	ALIGN64 UINT32 BeforeAltR; // 发送第一个ALT+R按键与enter之间的间隔时间
 	ALIGN64 BOOL RedirectDriveAlready; // 挂载磁盘完成标志
 	ALIGN64 BOOL ClipboardDone; // 剪切板内容设置成功标志
 

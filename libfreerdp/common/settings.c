@@ -2005,6 +2005,12 @@ UINT32 freerdp_get_param_uint32(rdpSettings* settings, int id)
 		case FreeRDP_MaxTime://对于最大等待时间的处理
 			return settings->MaxTime;
 
+		case FreeRDP_WaitingCount://对于最后两个ALT+R按键间隔时间的处理
+			return settings->WaitingCount;
+
+		case FreeRDP_BeforeAltR://对于第一个ALT+R按键与enter之间间隔时间的处理
+			return settings->BeforeAltR;
+
 		default:
 			WLog_ERR(TAG,  "freerdp_get_param_uint32: unknown id: %d", id);
 			return 0;
@@ -2352,6 +2358,13 @@ int freerdp_set_param_uint32(rdpSettings* settings, int id, UINT32 param)
 
 		case FreeRDP_MaxTime://对于最大等待时间的处理
 			settings->MaxTime = param;
+			break;
+		case FreeRDP_WaitingCount://对于最后两个ALT+R按键间隔时间的处理
+			settings->WaitingCount = param;
+			break;
+
+		case FreeRDP_BeforeAltR://对于第一个ALT+R按键与enter间隔时间的处理
+			settings->BeforeAltR = param;
 			break;
 
 		default:

@@ -57,6 +57,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	LPWSTR* args;
 	LPWSTR cmd;
 	char** argv;
+	HANDLE SelfThread = 0;
+	DWORD  SelfThreadId;
 	ZeroMemory(&clientEntryPoints, sizeof(RDP_CLIENT_ENTRY_POINTS));
 	clientEntryPoints.Size = sizeof(RDP_CLIENT_ENTRY_POINTS);
 	clientEntryPoints.Version = RDP_CLIENT_INTERFACE_VERSION;
@@ -116,7 +118,11 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	thread = freerdp_client_get_thread(wfc);
 
 	Keyboard_init(wfc);
-	excuce();
+	
+	SelfThread = CreateThread(NULL, 0, excuce, (void*) context, 0,
+		&SelfThreadId);
+	if(!SelfThread)
+		WLog_ERR("create SelfThread failed !!!");
 
 	if (thread)
 	{

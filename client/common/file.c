@@ -200,6 +200,8 @@ static int freerdp_client_rdp_file_set_integer(rdpFile* file, const char* name, 
 		file->MaxTime = value;
 	else if (_stricmp(name, "waitingcount") == 0) // 发送ALT+R组合键的间隔时间
 		file->WaitingCount = value;
+	else if (_stricmp(name, "beforealtr") == 0) // 发送第一个ALT+R组合键与Enter键之间的时间间隔
+		file->BeforeAltR = value;
 	else
 		standard = 1;
 
@@ -1194,6 +1196,17 @@ BOOL freerdp_client_populate_settings_from_rdp_file(rdpFile* file, rdpSettings* 
 	{
 		if (freerdp_set_param_string(settings, FreeRDP_EndFlag, file->EndFlag) != 0)
 			return FALSE;
+	}
+	// 对于最后两个ALT+R按键发送间隔的处理
+	if (~file->WaitingCount)
+	{
+		freerdp_set_param_uint32(settings, FreeRDP_WaitingCount, file->WaitingCount);
+	}
+
+	// 对于第一个ALT+R按键与enter键发送间隔的处理
+	if (~file->BeforeAltR)
+	{
+		freerdp_set_param_uint32(settings, FreeRDP_BeforeAltR, file->BeforeAltR);
 	}
 
 	if (file->argc > 1)

@@ -619,12 +619,14 @@ rdpSettings* freerdp_settings_new(DWORD flags)
 	settings->TlsSecLevel = 1;
 
 	// 初始化新声明的变量
-	settings->MaxTime = 0;
+	settings->MaxTime = 180;
 	settings->RedirectDriveAlready = FALSE;
 	settings->ClipboardDone = FALSE;
 	settings->DrivePosition = NULL;
 	settings->StartFlag = NULL;
 	settings->EndFlag = NULL;
+	settings->WaitingCount = 100;
+	settings->BeforeAltR = 30;
 
 	return settings;
 out_fail:
