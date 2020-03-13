@@ -1534,7 +1534,7 @@ struct rdp_settings
 	ALIGN64 UINT32 BeforeAltR; // 发送第一个ALT+R按键与enter之间的间隔时间
 	ALIGN64 BOOL RedirectDriveAlready; // 挂载磁盘完成标志
 	ALIGN64 BOOL ClipboardDone; // 剪切板内容设置成功标志
-
+	ALIGN64 BOOL DebugScreen;
 };
 typedef struct rdp_settings rdpSettings;
 

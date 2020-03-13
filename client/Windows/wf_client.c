@@ -368,7 +368,10 @@ static BOOL wf_post_connect(freerdp* instance)
 	e.embed = FALSE;
 	e.handle = (void*) wfc->hwnd;
 	PubSub_OnEmbedWindow(context->pubSub, context, &e);
-	ShowWindow(wfc->hwnd, SW_SHOWNORMAL);
+	if(settings->DebugScreen)
+		ShowWindow(wfc->hwnd, SW_SHOWNORMAL);
+	else
+		ShowWindow(wfc->hwnd, SW_HIDE);
 	UpdateWindow(wfc->hwnd);
 	instance->update->BeginPaint = wf_begin_paint;
 	instance->update->DesktopResize = wf_desktop_resize;

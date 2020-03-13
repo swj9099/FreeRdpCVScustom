@@ -160,7 +160,7 @@ struct rdp_file
 	DWORD MaxTime;//等待的最大时间 
 	DWORD WaitingCount;//发送ALT+R按键的间隔时间 
 	DWORD BeforeAltR; //发送第一个alt+r与enter之间的间隔时间
-
+	BOOL  DebugScreen;//开启Debug模式
 
 	int lineCount;
 	int lineSize;

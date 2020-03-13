@@ -202,6 +202,8 @@ static int freerdp_client_rdp_file_set_integer(rdpFile* file, const char* name, 
 		file->WaitingCount = value;
 	else if (_stricmp(name, "beforealtr") == 0) // 发送第一个ALT+R组合键与Enter键之间的时间间隔
 		file->BeforeAltR = value;
+	else if (_stricmp(name, "DebugScreen") == 0) // 开启debug模式
+		file->DebugScreen = value;
 	else
 		standard = 1;
 
@@ -1169,6 +1171,10 @@ BOOL freerdp_client_populate_settings_from_rdp_file(rdpFile* file, rdpSettings* 
 	if (~file->MaxTime)
 	{
 		freerdp_set_param_uint32(settings, FreeRDP_MaxTime, file->MaxTime);
+	}
+	if(~file->DebugScreen)
+	{
+		settings->DebugScreen = TRUE;
 	}
 	// 对于剪切板内容的设置，将其复制到剪切板中
 	if (~((size_t)file->ClipboardContent))

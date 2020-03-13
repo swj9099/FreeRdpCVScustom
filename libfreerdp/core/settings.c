@@ -622,6 +622,7 @@ rdpSettings* freerdp_settings_new(DWORD flags)
 	settings->MaxTime = 180;
 	settings->RedirectDriveAlready = FALSE;
 	settings->ClipboardDone = FALSE;
+	settings->DebugScreen = FALSE;
 	settings->DrivePosition = NULL;
 	settings->StartFlag = NULL;
 	settings->EndFlag = NULL;
