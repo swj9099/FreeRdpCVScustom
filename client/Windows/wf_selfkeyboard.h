@@ -36,6 +36,7 @@ enum KEY_SELFTYPE
 	KEY_R
 };
 
+int wf_change_console(rdpSettings* settings);
 
 BOOL pre_check_flag(char* filename);
 

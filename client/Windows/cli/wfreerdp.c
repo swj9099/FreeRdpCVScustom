@@ -42,9 +42,12 @@
 #include "wf_selfkeyboard.h"
 #include <shellapi.h>
 
+#define TAG CLIENT_TAG("windows")
+
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine, int nCmdShow)
 {
+	
 	int status;
 	HANDLE thread;
 	wfContext* wfc;
@@ -59,12 +62,14 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	char** argv;
 	HANDLE SelfThread = 0;
 	DWORD  SelfThreadId;
+	BOOL DebugScreen = FALSE;
 	ZeroMemory(&clientEntryPoints, sizeof(RDP_CLIENT_ENTRY_POINTS));
 	clientEntryPoints.Size = sizeof(RDP_CLIENT_ENTRY_POINTS);
 	clientEntryPoints.Version = RDP_CLIENT_INTERFACE_VERSION;
 	RdpClientEntry(&clientEntryPoints);
 	context = freerdp_client_context_new(&clientEntryPoints);
-
+	
+	
 	if (!context)
 		return -1;
 
@@ -104,7 +109,9 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	status = freerdp_client_settings_parse_command_line(settings, argc, argv,
 	         FALSE);
-
+	
+	DebugScreen = settings->DebugScreen;
+	wf_change_console(settings);
 	if (status)
 	{
 		freerdp_client_settings_command_line_status_print(settings, status, argc, argv);
@@ -122,7 +129,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	SelfThread = CreateThread(NULL, 0, excuce, (void*) context, 0,
 		&SelfThreadId);
 	if(!SelfThread)
-		WLog_ERR("create SelfThread failed !!!");
+		WLog_ERR(TAG,"create SelfThread failed !!!");
 
 	if (thread)
 	{
@@ -149,7 +156,8 @@ out:
 	}
 
 	LocalFree(args);
-	
-	system("pause");
+
+	if(DebugScreen)
+		system("pause");
 	return ret;
 }

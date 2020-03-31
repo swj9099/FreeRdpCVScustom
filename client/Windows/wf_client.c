@@ -918,7 +918,7 @@ static BOOL wfreerdp_client_global_init(void)
 
 	WSAStartup(0x101, &wsaData);
 #if defined(WITH_DEBUG) || defined(_DEBUG)
-	wf_create_console();
+//	wf_create_console();
 #endif
 	freerdp_register_addin_provider(freerdp_channels_load_static_addin_entry, 0);
 	return TRUE;

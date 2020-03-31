@@ -23,9 +23,36 @@
 
 #include "wf_event.h"
 #define TAG CLIENT_TAG("windows")
+#define LOGNAME "../test.log"
 
 rdpInput* g_myinput = NULL;
 BOOL EXCUCESTARTFLAGE=FALSE;
+
+int wf_change_console(rdpSettings* settings)
+{
+	BOOL DebugScreen = FALSE;
+	DebugScreen = settings->DebugScreen;
+
+	remove(LOGNAME);
+
+	if(DebugScreen)
+	{
+		if (!AllocConsole())
+		return 1;
+
+		freopen("CONOUT$", "w", stdout);
+		freopen("CONOUT$", "w", stderr);
+		WLog_INFO(TAG,  "Debug console created.");
+	
+	}
+	else
+	{
+		freopen(LOGNAME, "w", stdout);
+		freopen(LOGNAME, "w", stderr);
+		WLog_INFO(TAG,  "%s console created.",LOGNAME);
+	}
+	return 0;
+}
 
 BOOL pre_check_flag(char* filename)
 {
@@ -259,6 +286,7 @@ DWORD WINAPI excuce(rdpContext* context)
 	time_t endtime = 0;
 	time_t nowtime = 0;
 	
+
 	if (context)
 	{
 		wfc = (wfContext*) context;
@@ -411,8 +439,12 @@ out:
 	{
 		free(endflag);
 	}
+	
 
 	PostMessage(wfc->hwnd,WM_CLOSE,0,0);
+
+	
+
 	
 	return ret;
 
