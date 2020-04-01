@@ -23,17 +23,19 @@
 
 #include "wf_event.h"
 #define TAG CLIENT_TAG("windows")
-#define LOGNAME "../test.log"
+#define LOGNAME "\\test.log"
 
 rdpInput* g_myinput = NULL;
 BOOL EXCUCESTARTFLAGE=FALSE;
 
 int wf_change_console(rdpSettings* settings)
 {
+	char LogPathName[125] = {0};
 	BOOL DebugScreen = FALSE;
 	DebugScreen = settings->DebugScreen;
-
-	remove(LOGNAME);
+	
+	sprintf(LogPathName,"%s%s",settings->DrivePosition,LOGNAME);
+	remove(LogPathName);
 
 	if(DebugScreen)
 	{
@@ -43,13 +45,17 @@ int wf_change_console(rdpSettings* settings)
 		freopen("CONOUT$", "w", stdout);
 		freopen("CONOUT$", "w", stderr);
 		WLog_INFO(TAG,  "Debug console created.");
+		WLog_INFO(TAG,  "settings->DrivePosition is %s",settings->DrivePosition);
+		WLog_INFO(TAG,  "LOGNAME is %s",LOGNAME);
+		WLog_INFO(TAG,  "LogPathName is %s",LogPathName);
 	
 	}
 	else
 	{
-		freopen(LOGNAME, "w", stdout);
-		freopen(LOGNAME, "w", stderr);
-		WLog_INFO(TAG,  "%s console created.",LOGNAME);
+		
+		freopen(LogPathName, "w", stdout);
+		freopen(LogPathName, "w", stderr);
+		WLog_INFO(TAG,  "%s console created.",(char *)LogPathName);
 	}
 	return 0;
 }
