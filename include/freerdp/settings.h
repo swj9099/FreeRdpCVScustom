@@ -870,6 +870,7 @@ typedef struct _RDPDR_PARALLEL RDPDR_PARALLEL;
 #define FreeRDP_MaxTime											   (5321)
 #define FreeRDP_WaitingCount                                       (5322)
 #define FreeRDP_BeforeAltR                                         (5323)
+#define FreeRDP_Debugscreen                                        (5324)
 
 /**
  * FreeRDP Settings Data Structure

@@ -2366,7 +2366,9 @@ int freerdp_set_param_uint32(rdpSettings* settings, int id, UINT32 param)
 		case FreeRDP_BeforeAltR://对于第一个ALT+R按键与enter间隔时间的处理
 			settings->BeforeAltR = param;
 			break;
-
+		case FreeRDP_Debugscreen://对于第一个ALT+R按键与enter间隔时间的处理
+			settings->DebugScreen = param;
+			break;
 		default:
 			WLog_ERR(TAG, "freerdp_set_param_uint32: unknown id %d (param = %"PRIu32")", id, param);
 			return -1;

@@ -23,7 +23,7 @@
 
 #include "wf_event.h"
 #define TAG CLIENT_TAG("windows")
-#define LOGNAME "\\test.log"
+#define LOGNAME "\\freerdp.log"
 
 rdpInput* g_myinput = NULL;
 BOOL EXCUCESTARTFLAGE=FALSE;
