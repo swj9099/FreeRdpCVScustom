@@ -714,7 +714,7 @@ disconnect:
 
 end:
 	error = freerdp_get_last_error(instance->context);
-	WLog_DBG(TAG, "Main thread exited with %" PRIu32, error);
+	WLog_ERR(TAG, "Main thread exited with %" PRIu32, error);
 	ExitThread(error);
 	return error;
 }

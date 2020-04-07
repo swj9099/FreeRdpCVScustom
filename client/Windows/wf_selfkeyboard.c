@@ -28,6 +28,12 @@
 rdpInput* g_myinput = NULL;
 BOOL EXCUCESTARTFLAGE=FALSE;
 
+static void flushlog(void)
+{
+	fflush(stdout);
+	fflush(stderr);
+}
+
 int wf_change_console(rdpSettings* settings)
 {
 	char LogPathName[125] = {0};
@@ -55,7 +61,7 @@ int wf_change_console(rdpSettings* settings)
 		
 		freopen(LogPathName, "w", stdout);
 		freopen(LogPathName, "w", stderr);
-		WLog_INFO(TAG,  "%s console created.",(char *)LogPathName);
+		WLog_INFO(TAG,  "%s console created.\n",(char *)LogPathName);
 	}
 	return 0;
 }
@@ -73,7 +79,7 @@ BOOL pre_check_flag(char* filename)
 	
 	if ((err = _access_s(mfilename, 0)) == 0)
 	{
-		WLog_INFO(TAG, "[%s] 标志文件已成功检测",mfilename);
+		WLog_INFO(TAG, "[%s] 标志文件已成功检测\n",mfilename);
 		return TRUE;
 	}
 	else
@@ -173,6 +179,9 @@ void SelfSendOnekey(DWORD key1)
 			break;
 		case KEY_ALT:
 			mykey = RDP_SCANCODE_LMENU;
+			break;
+		case KEY_LEFT:
+			mykey = RDP_SCANCODE_LEFT;
 			break;
 		default:
 			WLog_ERR(TAG, "undefined Onekey!!!");
@@ -292,7 +301,7 @@ DWORD WINAPI excuce(rdpContext* context)
 	time_t endtime = 0;
 	time_t nowtime = 0;
 	
-
+	flushlog();
 	if (context)
 	{
 		wfc = (wfContext*) context;
@@ -319,12 +328,20 @@ DWORD WINAPI excuce(rdpContext* context)
 		ret = FALSE;
 		goto out;
 	}
-
+	Sleep(1000);
+	SelfSendKeyboard(ONEKEY,KEY_LEFT,0);
+	WLog_ERR(TAG, "send left  !!!");
+	Sleep(1000); 
+	SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
+	WLog_ERR(TAG, "send enter  !!!");
+	WLog_ERR(TAG, "wait for windows state up !!!");
+	Sleep(8000); 
+	//SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
 	//剪切板判断,等待3次失败认为失败
 	cont = 0;
 	while (!settings->ClipboardDone)
 	{
-		WLog_INFO(TAG, "剪切板设置失败！");
+		WLog_ERR(TAG, "剪切板设置失败！");
 		if(cont++ <=3)
 		{
 			Sleep(1000);
@@ -342,7 +359,7 @@ DWORD WINAPI excuce(rdpContext* context)
 	cont = 0;
 	while (!settings->RedirectDriveAlready)
 	{
-		WLog_INFO(TAG, "磁盘映射设置失败！");
+		WLog_ERR(TAG, "磁盘映射设置失败！");
 		if(cont++ <=3)
 		{
 			Sleep(2000);
@@ -355,7 +372,7 @@ DWORD WINAPI excuce(rdpContext* context)
 		}
 
 	}
-	
+	flushlog();
 	if(pre_check_flag(startflag) || pre_check_flag(endflag))
 	{
 		WLog_ERR(TAG,"[VM_Finished] 标志文件创建时间异常，请清除已有的标志文件，重新运行扫描脚本！ !!!");
@@ -364,35 +381,36 @@ DWORD WINAPI excuce(rdpContext* context)
 	}
 
 
-	SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
-	WLog_INFO(TAG, "wait for windows state up !!!");
-	Sleep(8000); 
+	flushlog();
 	SelfSendKeyboard(DOUBOLEKEY,KEY_WIN,KEY_D);
-	WLog_INFO(TAG, "send Win + D !!!");
+	WLog_ERR(TAG, "send Win + D !!!");
 	Sleep(3000);
 	SelfSendKeyboard(ONEKEY,KEY_ESC,0);
-	WLog_INFO(TAG, "send Esc !!!");
+	WLog_ERR(TAG, "send Esc !!!");
 	Sleep(3000); 
 	SelfSendKeyboard(ONEKEY,KEY_ESC,0);
-	WLog_INFO(TAG, "send Esc !!!");
+	WLog_ERR(TAG, "send Esc !!!");
+	flushlog();
 	Sleep(3000); 
 	SelfSendKeyboard(DOUBOLEKEY,KEY_WIN,KEY_R);
-	WLog_INFO(TAG, "send Win + R !!!");
+	WLog_ERR(TAG, "send Win + R !!!");
 	Sleep(3000);
 	SelfSendKeyboard(DOUBOLEKEY,KEY_CTRL,KEY_A);
-	WLog_INFO(TAG, "send CTRL + A !!!");
+	WLog_ERR(TAG, "send CTRL + A !!!");
 	Sleep(3000);
 	SelfSendKeyboard(ONEKEY,KEY_BACK,0);
-	WLog_INFO(TAG, "send Backspace !!!");
+	WLog_ERR(TAG, "send Backspace !!!");
+	flushlog();
 	Sleep(3000); 
 	SelfSendKeyboard(DOUBOLEKEY,KEY_CTRL,KEY_V);
-	WLog_INFO(TAG, "send CTRL + V !!!");
+	WLog_ERR(TAG, "send CTRL + V !!!");
 	Sleep(3000);
 	SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
-	WLog_INFO(TAG, "send ENTER!!!");
+	WLog_ERR(TAG, "send ENTER!!!");
 	Sleep((settings->BeforeAltR)*100);
 	SelfSendKeyboard(DOUBOLEKEY,KEY_ALT,KEY_R);
-	WLog_INFO(TAG, "send ALT + R  !!!");
+	WLog_ERR(TAG, "send ALT + R  !!!");
+	flushlog();
 	settings->WaitingCount;
 	time(&begintime);
 
@@ -431,11 +449,12 @@ DWORD WINAPI excuce(rdpContext* context)
 		}
 	}
 	time(&endtime);
-	WLog_INFO(TAG, "[VM_Finished] 扫描已完成！脚本运行时间为：%d s.", (int)(endtime - begintime));
+	WLog_ERR(TAG, "[VM_Finished] 扫描已完成！脚本运行时间为：%d s.", (int)(endtime - begintime));
 	
 	
 	
 out:
+	flushlog();
 	if (!startflag)
 	{
 		free(startflag);

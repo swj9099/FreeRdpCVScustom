@@ -494,7 +494,7 @@ fail:
 	return NULL;
 }
 
-POINTER_NEW_UPDATE* update_read_pointer_new(rdpUpdate* update, wStream* s)
+POINTER_NEW_UPDATE* update_read_pointer_new(rdpUpdate* updatet, wStream* s)
 {
 	POINTER_NEW_UPDATE* pointer_new = calloc(1, sizeof(POINTER_NEW_UPDATE));
 
@@ -518,7 +518,7 @@ POINTER_NEW_UPDATE* update_read_pointer_new(rdpUpdate* update, wStream* s)
 
 	return pointer_new;
 fail:
-	free_pointer_new_update(update->context, pointer_new);
+	free_pointer_new_update(updatet->context, pointer_new);
 	return NULL;
 }
 

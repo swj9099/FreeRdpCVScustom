@@ -33,7 +33,8 @@ enum KEY_SELFTYPE
 	KEY_C,
 	KEY_D,
 	KEY_V,
-	KEY_R
+	KEY_R,
+	KEY_LEFT
 };
 
 int wf_change_console(rdpSettings* settings);
