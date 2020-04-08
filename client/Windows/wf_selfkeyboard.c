@@ -329,14 +329,16 @@ DWORD WINAPI excuce(rdpContext* context)
 		goto out;
 	}
 	Sleep(1000);
+	SelfSendKeyboard(DOUBOLEKEY,KEY_WIN,KEY_D);
+	WLog_ERR(TAG, "send Win + D !!!");
 	SelfSendKeyboard(ONEKEY,KEY_LEFT,0);
 	WLog_ERR(TAG, "send left  !!!");
 	Sleep(1000); 
 	SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
 	WLog_ERR(TAG, "send enter  !!!");
 	WLog_ERR(TAG, "wait for windows state up !!!");
-	Sleep(8000); 
-	//SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
+	Sleep(2000); 
+	;
 	//¼ôÇÐ°åÅÐ¶Ï,µÈ´ý3´ÎÊ§°ÜÈÏÎªÊ§°Ü
 	cont = 0;
 	while (!settings->ClipboardDone)

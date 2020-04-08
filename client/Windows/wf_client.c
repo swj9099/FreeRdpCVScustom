@@ -955,10 +955,12 @@ static int wfreerdp_client_start(rdpContext* context)
 	HWND hWndParent;
 	HINSTANCE hInstance;
 	wfContext* wfc = (wfContext*) context;
+	rdpSettings* settings;
 	freerdp* instance = context->instance;
 	hInstance = GetModuleHandle(NULL);
 	hWndParent = (HWND) instance->settings->ParentWindowId;
 	instance->settings->EmbeddedWindow = (hWndParent) ? TRUE : FALSE;
+	settings = context->settings;
 	wfc->hWndParent = hWndParent;
 	wfc->hInstance = hInstance;
 	wfc->cursor = LoadCursor(NULL, IDC_ARROW);
@@ -977,11 +979,17 @@ static int wfreerdp_client_start(rdpContext* context)
 	wfc->wndClass.hIcon = wfc->icon;
 	wfc->wndClass.hIconSm = wfc->icon;
 	RegisterClassEx(&(wfc->wndClass));
-	wfc->keyboardThread = CreateThread(NULL, 0, wf_keyboard_thread, (void*) wfc, 0,
+	if(settings->DebugScreen)
+	{
+		wfc->keyboardThread = CreateThread(NULL, 0, wf_keyboard_thread, (void*) wfc, 0,
 	                                   &wfc->keyboardThreadId);
+		if (!wfc->keyboardThread)
+			return -1;
 
-	if (!wfc->keyboardThread)
-		return -1;
+	}
+
+
+
 
 	wfc->thread = CreateThread(NULL, 0, wf_client_thread, (void*) instance, 0,
 	                           &wfc->mainThreadId);
