@@ -714,7 +714,15 @@ disconnect:
 
 end:
 	error = freerdp_get_last_error(instance->context);
-	WLog_ERR(TAG, "Main thread exited with %" PRIu32, error);
+
+#if 0
+	//打印错误字符串，显示详细的错误信息
+	if(error != FREERDP_ERROR_SUCCESS)
+		WLog_ERR(TAG, "[VM_Finished] %s", freerdp_get_last_error_string(error));
+	else
+		WLog_ERR(TAG, "[VM_Finished] Main thread exited with %" PRIu32, error);
+#endif
+	WLog_ERR(TAG, "[VM_Finished] Main thread exited with %" PRIu32, error);
 	ExitThread(error);
 	return error;
 }
