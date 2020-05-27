@@ -64,8 +64,8 @@ int wf_change_console(rdpSettings* settings)
 	else
 	{
 		
-		f_stdout = freopen(LogPathName, "w", stdout);
-		f_stderr = freopen(LogPathName, "w", stderr);
+		f_stdout = freopen(LogPathName, "a+", stdout);
+		f_stderr = freopen(LogPathName, "a+", stderr);
 		WLog_INFO(TAG,  "%s console created.\n",(char *)LogPathName);
 	}
 	return 0;
