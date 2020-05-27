@@ -305,7 +305,7 @@ static BOOL drive_file_init(DRIVE_FILE* file)
 			size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
 			                             FORMAT_MESSAGE_IGNORE_INSERTS,
 			                             NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-			WLog_ERR(TAG, "Error in drive_file_init: %s %s", messageBuffer, file->fullpath);
+			//WLog_ERR(TAG, "Error in drive_file_init: %s %s", messageBuffer, file->fullpath);
 			/* Free the buffer. */
 			LocalFree(messageBuffer);
 #endif

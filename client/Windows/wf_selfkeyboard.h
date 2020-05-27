@@ -39,6 +39,8 @@ enum KEY_SELFTYPE
 
 int wf_change_console(rdpSettings* settings);
 
+int wf_close_console(rdpSettings* settings);
+
 BOOL pre_check_flag(char* filename);
 
 void SelfSendOnekey(DWORD key1);

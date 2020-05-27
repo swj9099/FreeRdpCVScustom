@@ -20,13 +20,16 @@
 #include <wf_selfkeyboard.h>
 #include <io.h>
 #include <time.h>
+#include <process.h>
 
 #include "wf_event.h"
 #define TAG CLIENT_TAG("windows")
-#define LOGNAME "\\freerdp.log"
+#define LOGNAME "\\freerdp"
 
 rdpInput* g_myinput = NULL;
 BOOL EXCUCESTARTFLAGE=FALSE;
+FILE * f_stderr = NULL;
+FILE * f_stdout = NULL;
 
 static void flushlog(void)
 {
@@ -38,9 +41,10 @@ int wf_change_console(rdpSettings* settings)
 {
 	char LogPathName[125] = {0};
 	BOOL DebugScreen = FALSE;
+	int Pidself = 0;
 	DebugScreen = settings->DebugScreen;
-	
-	sprintf(LogPathName,"%s%s",settings->DrivePosition,LOGNAME);
+	Pidself = _getpid();
+	sprintf(LogPathName,"%s%s_%d.log",settings->DrivePosition,LOGNAME,Pidself);
 	remove(LogPathName);
 
 	if(DebugScreen)
@@ -48,21 +52,55 @@ int wf_change_console(rdpSettings* settings)
 		if (!AllocConsole())
 		return 1;
 
-		freopen("CONOUT$", "w", stdout);
-		freopen("CONOUT$", "w", stderr);
+		freopen("CONOUT$", "a+", stdout);
+		freopen("CONOUT$", "a+", stderr);
 		WLog_INFO(TAG,  "Debug console created.");
 		WLog_INFO(TAG,  "settings->DrivePosition is %s",settings->DrivePosition);
 		WLog_INFO(TAG,  "LOGNAME is %s",LOGNAME);
+		WLog_INFO(TAG,  "Pidself is %d",Pidself);
 		WLog_INFO(TAG,  "LogPathName is %s",LogPathName);
 	
 	}
 	else
 	{
 		
-		freopen(LogPathName, "w", stdout);
-		freopen(LogPathName, "w", stderr);
+		f_stdout = freopen(LogPathName, "w", stdout);
+		f_stderr = freopen(LogPathName, "w", stderr);
 		WLog_INFO(TAG,  "%s console created.\n",(char *)LogPathName);
 	}
+	return 0;
+}
+
+int wf_close_console(rdpSettings* settings)
+{
+
+	BOOL DebugScreen = FALSE;
+	DebugScreen = settings->DebugScreen;
+
+	if(!settings)
+		return -1;
+
+
+	if(DebugScreen)
+		return 0;
+
+	flushlog();
+	fclose(stdout);
+	fclose(stderr);
+
+	if(!f_stdout)
+	{
+		fclose(f_stdout);
+		f_stdout = NULL;
+	};
+		
+
+	if(!f_stderr)
+	{
+		fclose(f_stderr);
+		f_stderr = NULL;
+	}
+
 	return 0;
 }
 
@@ -312,8 +350,8 @@ DWORD WINAPI excuce(rdpContext* context)
 		WLog_ERR(TAG,"param context is NULL !!!");
 		return FALSE;
 	}
-	while(!EXCUCESTARTFLAGE)
-		Sleep(2000);
+	//while(!EXCUCESTARTFLAGE)
+	//	Sleep(2000);
 
 	if (!get_startflag(settings, &startflag))
 	{
@@ -330,13 +368,13 @@ DWORD WINAPI excuce(rdpContext* context)
 	}
 	Sleep(1000);
 	SelfSendKeyboard(DOUBOLEKEY,KEY_WIN,KEY_D);
-	WLog_ERR(TAG, "send Win + D !!!");
+	WLog_INFO(TAG, "send Win + D !!!");
 	SelfSendKeyboard(ONEKEY,KEY_LEFT,0);
-	WLog_ERR(TAG, "send left  !!!");
+	WLog_INFO(TAG, "send left  !!!");
 	Sleep(1000); 
 	SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
-	WLog_ERR(TAG, "send enter  !!!");
-	WLog_ERR(TAG, "wait for windows state up !!!");
+	WLog_INFO(TAG, "send enter  !!!");
+	WLog_INFO(TAG, "wait for windows state up !!!");
 	Sleep(2000); 
 	;
 	//剪切板判断,等待3次失败认为失败
@@ -385,33 +423,33 @@ DWORD WINAPI excuce(rdpContext* context)
 
 	flushlog();
 	SelfSendKeyboard(DOUBOLEKEY,KEY_WIN,KEY_D);
-	WLog_ERR(TAG, "send Win + D !!!");
+	WLog_INFO(TAG, "send Win + D !!!");
 	Sleep(3000);
 	SelfSendKeyboard(ONEKEY,KEY_ESC,0);
-	WLog_ERR(TAG, "send Esc !!!");
+	WLog_INFO(TAG, "send Esc !!!");
 	Sleep(3000); 
 	SelfSendKeyboard(ONEKEY,KEY_ESC,0);
-	WLog_ERR(TAG, "send Esc !!!");
+	WLog_INFO(TAG, "send Esc !!!");
 	flushlog();
 	Sleep(3000); 
 	SelfSendKeyboard(DOUBOLEKEY,KEY_WIN,KEY_R);
-	WLog_ERR(TAG, "send Win + R !!!");
+	WLog_INFO(TAG, "send Win + R !!!");
 	Sleep(3000);
 	SelfSendKeyboard(DOUBOLEKEY,KEY_CTRL,KEY_A);
-	WLog_ERR(TAG, "send CTRL + A !!!");
+	WLog_INFO(TAG, "send CTRL + A !!!");
 	Sleep(3000);
 	SelfSendKeyboard(ONEKEY,KEY_BACK,0);
-	WLog_ERR(TAG, "send Backspace !!!");
+	WLog_INFO(TAG, "send Backspace !!!");
 	flushlog();
 	Sleep(3000); 
 	SelfSendKeyboard(DOUBOLEKEY,KEY_CTRL,KEY_V);
-	WLog_ERR(TAG, "send CTRL + V !!!");
+	WLog_INFO(TAG, "send CTRL + V !!!");
 	Sleep(3000);
 	SelfSendKeyboard(ONEKEY,KEY_ENTER,0);
-	WLog_ERR(TAG, "send ENTER!!!");
+	WLog_INFO(TAG, "send ENTER!!!");
 	Sleep((settings->BeforeAltR)*100);
 	SelfSendKeyboard(DOUBOLEKEY,KEY_ALT,KEY_R);
-	WLog_ERR(TAG, "send ALT + R  !!!");
+	WLog_INFO(TAG, "send ALT + R  !!!");
 	flushlog();
 	settings->WaitingCount;
 	time(&begintime);
@@ -451,7 +489,7 @@ DWORD WINAPI excuce(rdpContext* context)
 		}
 	}
 	time(&endtime);
-	WLog_ERR(TAG, "[VM_Finished] 扫描已完成！脚本运行时间为：%d s.", (int)(endtime - begintime));
+	WLog_INFO(TAG, "[VM_Finished] 扫描已完成！脚本运行时间为：%d s.", (int)(endtime - begintime));
 	
 	
 	

@@ -140,6 +140,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		}
 	}
 	
+	//wf_close_console(settings);
 	if (freerdp_client_stop(context) != 0)
 		goto out;
 

@@ -722,7 +722,7 @@ end:
 	else
 		WLog_ERR(TAG, "[VM_Finished] Main thread exited with %" PRIu32, error);
 #endif
-	WLog_ERR(TAG, "[VM_Finished] Main thread exited with %" PRIu32, error);
+	WLog_ERR(TAG, "Main thread exited with %" PRIu32, error);
 	ExitThread(error);
 	return error;
 }
@@ -919,8 +919,11 @@ static BOOL wfreerdp_client_global_init(void)
 	if (!getenv("HOME"))
 	{
 		char home[MAX_PATH * 2] = "HOME=";
-		strcat(home, getenv("HOMEDRIVE"));
-		strcat(home, getenv("HOMEPATH"));
+		// 当用户拥有HOMEDRIVE、HOMEPATH变量时，完成拼接; 当用户没有时（如system用户），不做处理，HOME为空
+		if (getenv("HOMEDRIVE"))
+			strcat(home, getenv("HOMEDRIVE"));
+		if (getenv("HOMEPATH"))
+			strcat(home, getenv("HOMEPATH"));
 		_putenv(home);
 	}
 
