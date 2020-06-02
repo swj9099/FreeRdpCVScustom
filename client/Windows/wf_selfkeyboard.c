@@ -350,8 +350,9 @@ DWORD WINAPI excuce(rdpContext* context)
 		WLog_ERR(TAG,"param context is NULL !!!");
 		return FALSE;
 	}
-	//while(!EXCUCESTARTFLAGE)
-	//	Sleep(2000);
+	//wait for freerdp connect success
+	while(!EXCUCESTARTFLAGE)
+		Sleep(2000);
 
 	if (!get_startflag(settings, &startflag))
 	{

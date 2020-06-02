@@ -597,7 +597,8 @@ static DWORD WINAPI wf_client_thread(LPVOID lpParam)
 
 	if (!freerdp_connect(instance))
 		goto end;
-
+	else
+		EXCUCESTARTFLAGE = TRUE;//freerdp connect success flag our thread go on
 	channels = instance->context->channels;
 	settings = instance->context->settings;
 	async_input = settings->AsyncInput;
@@ -661,7 +662,7 @@ static DWORD WINAPI wf_client_thread(LPVOID lpParam)
 		while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 		{
 			msg_ret = GetMessage(&msg, NULL, 0, 0);
-			EXCUCESTARTFLAGE = TRUE;
+			
 			if (instance->settings->EmbeddedWindow)
 			{
 				if ((msg.message == WM_SETFOCUS) && (msg.lParam == 1))
